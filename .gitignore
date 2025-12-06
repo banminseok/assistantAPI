@@ -1,0 +1,10 @@
+env/
+.env
+#.files/
+#.1cache/
+.streamlit
+temp_rag.py
+.backup/
+.backup
+
+sona
