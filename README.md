@@ -20,6 +20,8 @@
 .\env\Scripts\Activate.ps1
 streamlit run Home.py
 
+pip install yfinance openai --upgrade
+
 huggingface 모델 주소:
 
 - 일반 모델 -
