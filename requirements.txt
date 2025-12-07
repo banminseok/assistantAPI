@@ -3,5 +3,5 @@ openai
 langchain
 langchain-community>=0.2.20
 beautifulsoup4
-duckduckgo-search
+duckduckgo-search>=6.1.0
 wikipedia
