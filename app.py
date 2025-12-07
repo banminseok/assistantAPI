@@ -1,6 +1,6 @@
 import streamlit as st
 from openai import OpenAI
-import openai # For module level types if needed, or just rely on OpenAI class
+import openai 
 import os
 import time
 import json
