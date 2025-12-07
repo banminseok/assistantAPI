@@ -9,7 +9,6 @@ from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 from langchain_community.utilities import WikipediaAPIWrapper
 from langchain_community.tools import WikipediaQueryRun
 
-# Streamlit 페이지 설정
 st.set_page_config(
     page_title="Research Assistant",
     page_icon="🔍",
@@ -27,12 +26,11 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-# API 키 유효성 검사
 if not api_key:
     st.warning("Please enter your OpenAI API Key in the sidebar to continue.")
     st.stop()
 
-# OpenAI 클라이언트 초기화
+# 초기화
 if api_key:
     client = OpenAI(api_key=api_key)
     os.environ["OPENAI_API_KEY"] = api_key
@@ -42,23 +40,22 @@ else:
 st.write("Welcome! I can help you research topics using Wikipedia, DuckDuckGo, and Web Scraping.")
 
 # -----------------
-# 도구 함수
+# 함수
 # -----------------
-
 def wikipedia_search(inputs):
-    # Wikipedia를 검색합니다.
+    # Wikipedia를 검색
     query = inputs["query"]
     wikipedia = WikipediaQueryRun(api_wrapper=WikipediaAPIWrapper())
     return wikipedia.run(query)
 
 def duckduckgo_search(inputs):
-    # DuckDuckGo를 검색합니다.
+    # DuckDuckGo를 검색
     query = inputs["query"]
     ddg = DuckDuckGoSearchAPIWrapper()
     return ddg.run(query)
 
 def get_web_content(inputs):
-    # URL에서 콘텐츠를 스크래핑하고 추출합니다.
+    # URL에서 콘텐츠를 스크래핑하고 추출
     url = inputs["url"]
     try:
         loader = WebBaseLoader(url)
@@ -74,14 +71,13 @@ def get_web_content(inputs):
     except Exception as e:
         return f"Error scraping {url}: {str(e)}"
 
-# 함수 실행을 위한 매핑
 functions_map = {
     "wikipedia_search": wikipedia_search,
     "duckduckgo_search": duckduckgo_search,
     "get_web_content": get_web_content,
 }
 
-# OpenAI 도구 정의
+
 functions = [
     {
         "type": "function",
@@ -136,10 +132,8 @@ functions = [
     }
 ]
 
-# -----------------
-# 헬퍼 함수
-# -----------------
 
+# 헬퍼 함수
 def get_tool_outputs(run_id, thread_id):
     run = client.beta.threads.runs.retrieve(
         run_id=run_id,
@@ -151,13 +145,11 @@ def get_tool_outputs(run_id, thread_id):
         function = action.function
         print(f"Calling function: {function.name} with arg {function.arguments}")
         
-        # 인수 파싱
         try:
             args = json.loads(function.arguments)
         except json.JSONDecodeError:
             args = {} 
             
-        # 도구 실행
         output_result = functions_map[function.name](args)
         
         outputs.append(
@@ -198,7 +190,6 @@ class EventHandler(openai.AssistantEventHandler):
 
     @openai.override
     def on_text_delta(self, delta, snapshot):
-        # 토큰 누적 및 UI 업데이트
         self.current_message += delta.value
         if self.message_box:
             self.message_box.markdown(self.current_message.replace("$", "\$"))
@@ -209,9 +200,7 @@ class EventHandler(openai.AssistantEventHandler):
         if event.event == "thread.run.requires_action":
             submit_tool_outputs(event.data.id, event.data.thread_id)
 
-# -----------------
-# 메인
-# -----------------
+
 
 ASSISTANT_NAME = "Research Assistant Agent"
 
@@ -277,7 +266,6 @@ if query:
         content=query,
     )
     
-    # 3. 스트림 실행
     with st.chat_message("assistant"):
         with client.beta.threads.runs.stream(
             thread_id=thread.id,
